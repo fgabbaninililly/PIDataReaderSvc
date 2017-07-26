@@ -9,7 +9,6 @@ using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
-using PIDataReaderLib;
 using System.IO;
 using PIDataReaderCommons;
 using System.Threading;
@@ -81,7 +80,7 @@ namespace PIDataReaderSvc {
 			SetServiceStatus(this.ServiceHandle, ref serviceStatus);
 
 			//WRITE CODE TO INITIALIZE AND START SERVICE
-			piDataReaderCtrl = new PIDRController(Version.getVersion(), PIDataReaderLib.Version.getVersion(), true);
+			piDataReaderCtrl = new PIDRController(Version.getVersion(), true);
 
 			List<string> al = new List<string>(Environment.GetCommandLineArgs());
 			al.RemoveAt(0);
