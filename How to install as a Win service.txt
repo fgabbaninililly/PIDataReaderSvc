@@ -1,0 +1,22 @@
+﻿OPTION 1
+Edit the file SvcInstall.bat and then launch it
+
+OPTION 2
+1. Identify the service name [SERVICENAME]
+2. Identify the full installation path of the service executable [SVCEXE]. This is "C:\Program Files\Eli Lilly\PIDataReaderApps\PIDataReaderSvc.exe" by default.
+3. Indentify the full path to the configuration file [CFGFILE]. Example: D:\Projects\DOTNET\PIDataReaderApps\SampleConfigFiles\config.tags.xml
+4. Install as service using the following instruction:
+	sc.exe create [SERVICENAME] binPath= "[SVCEXE] -c [CFGFILE] -f none"
+5. Open the service console and setup the service
+		General
+			Startup type: Automatic
+		Log On
+			Logon as: \EMA\XFDIAOSIPI with appropriate password
+ 		Recovery
+			First failure: Restart the Service
+			Second failure: Restart the Service
+ 			Subsequent failures: Restart the Service
+6. Start the service from the service console
+
+NOTES:
+- multiple instances of the same service executable can be installed, pointing to different configuration files, provided different service names are specified.
