@@ -9,7 +9,7 @@ namespace PIDataReaderSvc {
 		public static readonly string version = "0.1.0";
 
 		public static string getVersion() {
-			return string.Format("PIDataReaderSvc version {0}", version);
+			return string.Format("PIDataReader Service Launcher v{0}", version);
 		}
 	}
 }
