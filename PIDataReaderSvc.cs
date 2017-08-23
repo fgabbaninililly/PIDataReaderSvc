@@ -88,7 +88,7 @@ namespace PIDataReaderSvc {
 
 			int res = piDataReaderCtrl.start(commandLineArgs);
 			if (ExitCodes.EXITCODE_SUCCESS != res) {
-				logger.Fatal("Failed to start service! Reason: {0}", res);
+				logger.Fatal("Failed to start service! Reason: {0}", ExitCodes.Instance[res]);
 				Stop();
 			}
 			
