@@ -42,7 +42,7 @@ using System.Timers;
 namespace PIDataReaderSvc {
 	public partial class PIDataReaderSvc : ServiceBase {
 		private static Logger logger = LogManager.GetCurrentClassLogger();
-		
+
 		public enum ServiceState {
 			SERVICE_STOPPED = 0x00000001,
 			SERVICE_START_PENDING = 0x00000002,
@@ -73,7 +73,19 @@ namespace PIDataReaderSvc {
 			InitializeComponent();
 		}
 
+		protected void startPIDR(string[] commandLineArgs) {
+			int res = piDataReaderCtrl.start(commandLineArgs);
+			if (ExitCodes.EXITCODE_SUCCESS != res) {
+				logger.Fatal("Failed to start service! Reason: {0}", ExitCodes.Instance[res]);
+				Stop();
+			} else { 
+				logger.Info("Service started successfully!");
+			}
+		}
+
 		protected override void OnStart(string[] args) {
+			//System.Diagnostics.Debugger.Launch();
+
 			ServiceStatus serviceStatus = new ServiceStatus();
 			serviceStatus.dwCurrentState = ServiceState.SERVICE_START_PENDING;
 			serviceStatus.dwWaitHint = 100000;
@@ -86,11 +98,8 @@ namespace PIDataReaderSvc {
 			al.RemoveAt(0);
 			string[] commandLineArgs = al.ToArray<string>();
 
-			int res = piDataReaderCtrl.start(commandLineArgs);
-			if (ExitCodes.EXITCODE_SUCCESS != res) {
-				logger.Fatal("Failed to start service! Reason: {0}", ExitCodes.Instance[res]);
-				Stop();
-			}
+			//https://stackoverflow.com/questions/5563299/how-to-call-any-method-asynchronously-in-c-sharp#
+			new Task(() => { startPIDR(commandLineArgs); }).Start();
 			
 			serviceStatus.dwCurrentState = ServiceState.SERVICE_RUNNING;
 			SetServiceStatus(this.ServiceHandle, ref serviceStatus);
@@ -104,13 +113,23 @@ namespace PIDataReaderSvc {
 
 			//DELIBERATELY NOT TRYING TO CLOSE MQTT CLIENT GRACEFULLY: WE WANT IT TO SEND A LAST WILL MESSAGE!
 
-			piDataReaderCtrl.stop();
-			logger.Info("Service was stopped correctly.");
-
-			piDataReaderCtrl.sendMail();
-
+			try { 
+				piDataReaderCtrl.stop();
+				logger.Info("PIDataReaderController was stopped correctly.");	
+			} catch (Exception e) {
+				logger.Error(String.Format("There were some issues stopping PIDataReaderController: {0}", e.Message));
+			} 
+			
+			try {
+				piDataReaderCtrl.sendMail();
+			} catch(Exception) {
+				logger.Error("Error sending mail!");
+			}
+						
 			serviceStatus.dwCurrentState = ServiceState.SERVICE_STOPPED;
 			SetServiceStatus(this.ServiceHandle, ref serviceStatus);
+			logger.Info("Service was stopped.");
+			
 		}
 		
 	}
